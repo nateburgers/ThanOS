@@ -1,0 +1,14 @@
+	;; Exports
+global port_read_byte
+global port_write_byte	
+	;; Implementations
+port_read_byte:	
+	mov edx, [esp + 4]
+	in al, dx
+	ret
+
+port_write_byte:
+	mov edx, [esp + 4]
+	mov al, [esp + 4 + 4]
+	out dx, al
+	ret

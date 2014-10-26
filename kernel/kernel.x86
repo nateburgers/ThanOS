@@ -1,0 +1,47 @@
+global start
+extern kernel_main
+
+FLAGS		equ 0x00
+MAGIC		equ 0x1BADB002
+CHECKSUM 	equ -(MAGIC + FLAGS)
+
+section .text
+align 4
+multi_boot_header:
+	dd MAGIC
+	dd FLAGS
+	dd CHECKSUM
+interrupt_descriptor_table:	
+	dw 0x3FF		; 256 4-byte entries = 1Kb
+	dd 0
+page_mode_cr0:	
+	dd 0
+start:
+	cli		 ; disable interrupts for initial boot
+	jmp start_kernel
+	;; set registers up for 16-bit protected mode
+	mov eax, 0	; 16-bit protected mode data selector
+	mov ds, eax
+	mov es, eax
+	mov fs, eax
+	mov gs, eax
+	mov ss, eax
+	;; disable paging
+	mov eax, cr0
+	mov [page_mode_cr0], eax
+	and eax, 0x7FFFFFFE
+	mov cr0, eax
+	jmp start_real_mode
+start_real_mode:
+	mov sp, 0x8000		; reserve stack space
+	mov ax, 0
+	mov cs, ax
+	mov ds, ax
+	mov es, ax
+	mov fs, ax
+	mov gs, ax
+	mov ss, ax
+	lidt [interrupt_descriptor_table]
+start_kernel:
+	call kernel_main
+	hlt

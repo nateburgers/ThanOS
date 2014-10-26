@@ -1,0 +1,6 @@
+global bios_blocks_free
+	
+bios_blocks_free:
+	push ebp
+	pop ebp
+	ret
